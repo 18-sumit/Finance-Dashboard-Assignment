@@ -3,6 +3,7 @@ import { BalanceTrendChart } from '../components/dashboard/BalanceTrendChart';
 import { SpendingBreakdown } from '../components/dashboard/SpendingBreakdown';
 import { AccountBalances } from '../components/dashboard/AccountBalances';
 import { RecentTransactions } from '../components/dashboard/RecentTransactions';
+import { BudgetSummaryWidget } from '../components/dashboard/BudgetSummaryWidget';
 
 export const DashboardPage = () => {
   return (
@@ -24,8 +25,11 @@ export const DashboardPage = () => {
         <AccountBalances />
       </div>
 
-      <div className="grid gap-4 grid-cols-1">
-        <RecentTransactions />
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <RecentTransactions />
+        </div>
+        <BudgetSummaryWidget />
       </div>
     </div>
   );
