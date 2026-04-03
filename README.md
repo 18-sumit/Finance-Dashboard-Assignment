@@ -1,0 +1,506 @@
+# 🏦 Zentrix Finance Dashboard
+
+A modern, full-featured **personal finance management dashboard** built with React, TypeScript, and Tailwind CSS. Zentrix helps users track income and expenses, manage accounts, analyze spending patterns, and gain actionable financial insights — all in an elegant, dark-mode-first UI.
+
+---
+
+## 📋 Table of Contents
+
+- [Overview](#-overview)
+- [Tech Stack](#-tech-stack)
+- [Setup & Installation](#-setup--installation)
+- [Project Structure](#-project-structure)
+- [Features](#-features)
+  - [Dashboard](#1-dashboard)
+  - [Transactions](#2-transactions)
+  - [Accounts](#3-accounts)
+  - [Insights](#4-insights)
+  - [Categories](#5-categories)
+- [State Management Approach](#-state-management-approach)
+- [Design System](#-design-system)
+- [Role-Based Access](#-role-based-access)
+- [Data Persistence](#-data-persistence)
+- [Exporting Data](#-exporting-data)
+
+---
+
+## 🌐 Overview
+
+Zentrix Finance Dashboard is a SPA (Single Page Application) designed to help individuals monitor their complete financial picture. It provides:
+
+- Real-time financial summaries (income, expenses, savings rate, account balances)
+- Full transaction management with filtering, pagination, and export
+- Multi-account support with balance tracking
+- Deep spending analytics with behavioral insights
+- Customizable spending categories
+- Role-aware UI (Admin vs Viewer modes)
+
+The application is entirely **client-side** — no backend or API is needed. All data is persisted to `localStorage` using Zustand's `persist` middleware, making it fully functional offline after initial load.
+
+---
+
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Framework** | React 19 + TypeScript 5.9 |
+| **Build Tool** | Vite 8 |
+| **Routing** | React Router DOM v7 |
+| **Styling** | Tailwind CSS v3.4 + tailwindcss-animate |
+| **State Management** | Zustand v5 (with `persist` middleware) |
+| **UI Components** | Radix UI primitives (Dialog, Select, Dropdown, Switch, Tabs, Tooltip) |
+| **Charts & Visualization** | Recharts v3 (BarChart, AreaChart, PieChart, RadarChart) |
+| **Icons** | Lucide React |
+| **Date Utilities** | date-fns v4 |
+| **CSV Parsing / Export** | PapaParse v5 |
+| **Toast Notifications** | Sonner v2 |
+| **Utility** | clsx, tailwind-merge, class-variance-authority |
+
+---
+
+## ⚙️ Setup & Installation
+
+### Prerequisites
+
+- **Node.js** v18 or higher
+- **npm** v9 or higher
+
+### Steps
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/zorvyn-finance-dashboard.git
+cd zorvyn-finance-dashboard/finance-dashboard
+
+# 2. Install all dependencies
+npm install
+
+# 3. Start the development server
+npm run dev
+```
+
+The app will be available at **http://localhost:5173** (or the next available port).
+
+### Other Commands
+
+```bash
+# Type-check & build for production
+npm run build
+
+# Preview the production build locally
+npm run preview
+
+# Run ESLint
+npm run lint
+```
+
+### Notes
+
+- No `.env` file is required — the app has zero external API dependencies.
+- On first launch, the app seeds itself with **mock transaction and account data** so you can explore all features immediately.
+- All data changes persist automatically to your browser's `localStorage`.
+
+---
+
+## 📁 Project Structure
+
+```
+finance-dashboard/
+├── public/
+├── src/
+│   ├── components/
+│   │   ├── accounts/
+│   │   │   ├── AccountCard.tsx        # Single account display card
+│   │   │   └── AccountModal.tsx       # Add/Edit account dialog
+│   │   ├── dashboard/
+│   │   │   ├── AccountBalances.tsx    # Horizontal scrollable account list
+│   │   │   ├── BalanceTrendChart.tsx  # 6-month area chart
+│   │   │   ├── RecentTransactions.tsx # Last 5 transactions widget
+│   │   │   ├── SpendingBreakdown.tsx  # Donut chart by category
+│   │   │   └── SummaryCards.tsx       # KPI metric cards (balance, income, expense, savings)
+│   │   ├── layout/
+│   │   │   ├── Header.tsx             # Sticky top bar with theme toggle & role switcher
+│   │   │   ├── Layout.tsx             # Root layout (sidebar + main area)
+│   │   │   └── Sidebar.tsx            # Fixed navigation sidebar
+│   │   └── ui/
+│   │       ├── AmountBadge.tsx        # Color-coded amount display (+/-)
+│   │       ├── CategoryIcon.tsx       # Dynamic icon + label from category store
+│   │       ├── ConfirmDialog.tsx      # Reusable confirmation dialog
+│   │       ├── EmptyState.tsx         # Zero-state UI with action CTA
+│   │       ├── button.tsx             # Radix Slot-based button variants
+│   │       ├── card.tsx               # Card + CardHeader + CardContent
+│   │       ├── dialog.tsx             # Radix Dialog wrapper
+│   │       ├── dropdown-menu.tsx      # Radix DropdownMenu wrapper
+│   │       └── select.tsx             # Radix Select wrapper
+│   ├── hooks/
+│   │   ├── useInsights.ts             # Aggregated financial metrics hook
+│   │   └── useTransactions.ts         # Filtered + paginated transaction hook
+│   ├── lib/
+│   │   ├── categories.ts              # Default category definitions
+│   │   ├── formatters.ts              # Currency & percentage formatters
+│   │   ├── mockData.ts                # Seed data for initial launch
+│   │   └── utils.ts                   # cn() utility (clsx + tailwind-merge)
+│   ├── pages/
+│   │   ├── AccountsPage.tsx           # Account management page
+│   │   ├── CategoriesPage.tsx         # Category management page
+│   │   ├── DashboardPage.tsx          # Overview / home page
+│   │   ├── InsightsPage.tsx           # Analytics & behavioral insights
+│   │   └── TransactionsPage.tsx       # Full transaction list with filter/pagination
+│   ├── stores/
+│   │   ├── accountStore.ts            # Account CRUD + balance management
+│   │   ├── categoryStore.ts           # Category CRUD (persisted)
+│   │   ├── filterStore.ts             # Global transaction filter state
+│   │   ├── transactionStore.ts        # Transaction CRUD (persisted)
+│   │   └── uiStore.ts                 # Theme, role, sidebar open state
+│   ├── types/
+│   │   └── index.ts                   # TypeScript interfaces for core entities
+│   ├── App.tsx                        # Router configuration
+│   ├── main.tsx                       # React entry point
+│   └── index.css                      # Global base styles + custom scrollbar
+├── package.json
+├── tailwind.config.js
+├── tsconfig.json
+└── vite.config.ts
+```
+
+---
+
+## ✨ Features
+
+### 1. Dashboard
+
+**Route:** `/`
+
+The command center of the app. Provides an immediate financial snapshot:
+
+#### KPI Summary Cards
+Four metric cards at the top display:
+- **Total Balance** — Sum of all account balances
+- **Income This Month** — Total income with % change vs last month
+- **Expenses This Month** — Total expenses with % change vs last month  
+- **Savings Rate** — `(Income - Expense) / Income × 100`
+
+All cards feature subtle **hover lift animations** with a primary color border glow.
+
+#### Balance Trend Chart
+- **6-month area chart** using Recharts — shows cumulative balance movement over time
+- Gradient fill below the line for a premium visual appearance
+- Custom formatted Y-axis and tooltip
+
+#### Spending Breakdown
+- **Donut/Pie chart** breaking down this month's expenses by category
+- Total spent displayed in the center
+- Category names resolved from the dynamic category store
+
+#### Account Balances Strip
+- Horizontally scrollable card row showing all accounts
+- Each account card features a **colored left border** matching the account's custom color
+- Shows account name, type, and current balance
+
+#### Recent Transactions
+- Last **5 transactions** sorted by date (newest first)
+- **3-column grid layout** — Category icon (left), Transaction title + date (center-aligned), Amount badge (right)
+- **"View All"** link to the full Transactions page
+
+---
+
+### 2. Transactions
+
+**Route:** `/transactions`
+
+Full transaction ledger with advanced management capabilities.
+
+#### Transaction List
+- Displays transactions in paginated format — **15 per page**
+- Each row shows: category icon, title, date, account, type badge, and amount
+- Color-coded amounts: **green** for income, **red** for expenses
+
+#### Filtering System
+Multiple simultaneous filters:
+- **Search** — fuzzy search by transaction title or date string
+- **Category** — filter by specific spending category
+- **Type** — All / Income / Expense / Transfer
+- **Time Preset** — This Month / Last Month / Last 3 / 6 / 9 Months / 1 Year
+- **Date Range** — Precise from/to date picker
+
+All filters are managed via the global `filterStore` (Zustand), so filter state persists when navigating between pages and can be set programmatically (e.g., clicking a heatmap square on the Insights page redirects here with the date pre-filter applied).
+
+#### Pagination
+- 15 transactions per page
+- Page navigation controls at the bottom
+- Displays current page range (e.g., "Showing 1–15 of 48 transactions")
+
+#### Add Transaction
+- Full modal dialog with fields: Title, Amount, Type (Income/Expense/Transfer), Category, Account, Date, Notes
+- On save, the linked account's balance updates **automatically**
+
+#### Export to CSV / JSON *(Admin only)*
+- Export button with a dropdown: **CSV** or **JSON**
+- Exports **respect the currently active filters** — only filtered/visible transactions are exported
+- CSV is formatted for spreadsheet use; JSON is pretty-printed
+
+#### Bulk Delete *(Admin only)*
+- Checkbox column appears for admin users
+- Select individual rows or "Select All" on the current page
+- Delete selected with a confirmation dialog
+
+---
+
+### 3. Accounts
+
+**Route:** `/accounts`
+
+Manage all your wallets, bank accounts, and credit cards.
+
+#### Account Cards
+- Grid of account cards — each shows: icon, name, type, current balance
+- **Left-colored border** unique to each account for instant visual identification
+- Balance updates **in real time** as transactions are added/edited/deleted
+
+#### Add / Edit Account *(Admin only)*
+- Modal with fields: Name, Type (Bank / Wallet / UPI / Credit / Savings), Starting Balance, Color, Icon
+- Editing an account preserves transaction history
+
+#### Delete Account *(Admin only)*
+- Shows a **warning dialog** if the account has linked transactions
+- Prevents accidental data loss
+
+#### Empty State
+- Friendly empty-state UI with a call-to-action shown when no accounts exist yet
+
+---
+
+### 4. Insights
+
+**Route:** `/insights`
+
+The most feature-rich page — 7 distinct analytical panels:
+
+#### Top Category
+- Highlights the **single category** where the user has spent the most this month
+- Large centered icon, label, and total amount
+
+#### Savings Rate Tracker
+- Circular ring visualization displaying this month's savings rate
+- Status message: *"On Track ✅"* or *"Needs attention ⚠️"*
+
+#### Month Comparison Bar Chart
+- Side-by-side bars comparing **last month vs this month** income and expenses
+
+#### Expense Heatmap *(90 Days)*
+- GitHub-style contribution heatmap (7 rows × ~13 columns grid)
+- Each cell represents one day; color intensity reflects spending magnitude
+  - ⬜ No spend → 🟡 Low → 🟠 Medium → 🔴 High
+- **Hover tooltip** shows: Date, Total Spent, Transaction Count
+- **Click** any cell to instantly jump to Transactions page with that date pre-filtered
+- Month labels positioned below matching their column
+
+#### 🆕 Day of Week Spending Radar
+- **Radar (spider-web) chart** plotting average spend across Mon–Sun
+- Identifies the user's most expensive day of the week
+- Dynamic callout: *"You spend 42% of your weekly budget on Saturdays. Be mindful this Saturday!"*
+
+#### 🆕 Burn Rate & Forecast
+- Calculates **Average Daily Spend** from month start to today
+- Projects total spend if the current rate continues to month end
+- **Animated progress bar** with dynamic color:
+  - 🟢 Green: projected < 80% of income
+  - 🟡 Amber: projected 80–100% of income
+  - 🔴 Red: projected > 100% of income (over budget)
+- Companion bar chart comparing Income vs Projected Spend
+- Smart status message: plaintext forecast explanation
+
+#### 🆕 Needs vs Wants — 50/30/20 Rule Analysis
+- Classifies all this month's expenses into:
+  - **Needs (Fixed):** Rent, health, utilities, insurance, groceries, education, EMIs
+  - **Wants (Variable):** Entertainment, dining out, shopping, travel, subscriptions
+- **Horizontal stacked bar** showing the visual ratio split
+- Two detail cards with mini progress bars and ideal-vs-actual check indicators (✅/⚠️)
+- Educational callout explaining the 50/30/20 rule for financial literacy
+
+---
+
+### 5. Categories
+
+**Route:** `/categories`
+
+Manage the taxonomy of your spending.
+
+#### Category Cards
+- Grid of all categories — each shows the icon and label
+- Subtle **hover lift + border glow animation** on mouse-over
+
+#### Add / Edit Category *(Admin only)*
+- Modal with fields: Name, Icon (from 20+ Lucide icon options), Color (10 vibrant presets)
+- Category IDs are auto-generated from the label name
+
+#### Delete Category *(Admin only)*
+- Removes the category from the store
+
+> **Note:** Default categories (Food & Dining, Transportation, Entertainment, Health, Shopping, etc.) are seeded from `src/lib/categories.ts` and stored in the persisted `categoryStore`.
+
+---
+
+## 🧠 State Management Approach
+
+The app uses **Zustand** — a lightweight, zero-boilerplate state management library. There are 5 stores:
+
+| Store | Purpose | Persisted |
+|-------|---------|-----------|
+| `transactionStore` | Transaction CRUD + account balance sync | ✅ localStorage |
+| `accountStore` | Account CRUD + balance update method | ✅ localStorage |
+| `categoryStore` | Category CRUD with default seed | ✅ localStorage |
+| `filterStore` | Active filter state (search, type, category, date preset, date range) | ❌ Session only |
+| `uiStore` | Theme (dark/light), Role (admin/viewer), Sidebar open/close | ✅ localStorage |
+
+### Cross-Store Balance Sync
+When a transaction is added, edited, or deleted, `transactionStore` directly calls `accountStore.getState().updateBalance()` to keep account balances accurate without needing React context waterfalls or prop drilling.
+
+### Computed Data via Hooks
+Complex derived values are calculated in custom hooks (`useInsights`, `useTransactions`) using `useMemo` — these return computed aggregates from raw store data, keeping business logic separate from UI components.
+
+---
+
+## 🎨 Design System
+
+The UI follows a **dark-mode-first** design with a cohesive token system:
+
+### Color Tokens (HSL CSS Variables)
+Defined in `index.css` and consumed via Tailwind's `hsl(var(--...))` pattern:
+- `--background`, `--foreground`
+- `--card`, `--card-foreground`
+- `--primary`, `--primary-foreground`
+- `--muted`, `--muted-foreground`
+- `--border`, `--input`
+- `--destructive`
+
+### Scrollbar Styling
+Custom webkit scrollbar styles in `index.css` match the dark theme — thin, subtle, and adapts between dark/light.
+
+### Card Hover Effect (Global Pattern)
+All cards across the app share a consistent hover animation:
+```
+hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 hover:border-primary/40
+```
+This produces a slight lift + shadow deepening + subtle brand border glow on hover.
+
+### Typography
+Uses system font stack with Tailwind's `tracking-tight` for headings and `tabular-nums` for all financial figures (ensures columns align properly).
+
+---
+
+## 🔐 Role-Based Access
+
+The app supports two roles, toggled from the Header:
+
+| Feature | Admin | Viewer |
+|---------|-------|--------|
+| View all pages | ✅ | ✅ |
+| Add transactions | ✅ | ❌ |
+| Edit transactions | ✅ | ❌ |
+| Delete transactions | ✅ | ❌ |
+| Bulk delete transactions | ✅ | ❌ |
+| Export CSV / JSON | ✅ | ❌ |
+| Add/Edit/Delete accounts | ✅ | ❌ |
+| Add/Edit/Delete categories | ✅ | ❌ |
+
+Role state is stored in `uiStore` and persisted — the UI dynamically shows/hides action buttons, modals, and interactive features based on the active role.
+
+---
+
+## 💾 Data Persistence
+
+All core data persists to `localStorage` via Zustand `persist` middleware:
+
+| Key | Contents |
+|-----|---------|
+| `finance-transaction-storage` | All transaction records |
+| `finance-account-storage` | All account records + balances |
+| `finance-category-storage` | All custom and default categories |
+| `finance-ui-storage` | Theme preference, active role |
+
+**To reset all data** to factory mock data, use the "Reset to Mock Data" button (Admin only) which calls `transactionStore.resetAll()`.
+
+---
+
+## 📤 Exporting Data
+
+Available on the **Transactions** page for Admin users:
+
+### CSV Export
+- Compatible with Excel, Google Sheets, Numbers
+- Columns: ID, Date, Title, Amount, Type, Category, Account ID, Notes
+- Filters applied — only the currently visible/filtered set is exported
+
+### JSON Export
+- Pretty-printed JSON array
+- Full transaction objects including all fields
+- Same filter-awareness as CSV export
+
+Both exports trigger an automatic browser download with a timestamped filename.
+
+---
+
+## 🔒 Design Decision: Why You Can't Change an Account's Balance Directly
+
+This is an intentional architectural decision rooted in **financial data integrity**, and it's worth understanding clearly.
+
+### How Account Balance Works
+
+When you create an account, you set an **Opening Balance** — this is treated as a fixed starting point, essentially representing the account's value on the day you started tracking it in the app.
+
+After that, the account's `balance` field in the store is **never set to a fixed number directly by the user**. Instead, it evolves exclusively through the `updateBalance(id, amountChange)` method, which only ever **adds or subtracts a delta**:
+
+```ts
+// In accountStore.ts
+updateBalance: (id, amountChange) =>
+  set((state) => ({
+    accounts: state.accounts.map((a) =>
+      a.id === id ? { ...a, balance: a.balance + amountChange } : a
+    )
+  }))
+```
+
+This method is called automatically by `transactionStore` every time a transaction is:
+- **Added** → balance increases (income) or decreases (expense)
+- **Edited** → old effect is reversed, new effect is applied
+- **Deleted** → effect is reversed to restore the prior balance
+
+### Why Not Allow Direct Editing of the Balance?
+
+If a user could type any arbitrary number into the balance field of an existing account, it would create a **silent data gap**:
+
+> The account shows ₹50,000 — but the transaction history only accounts for ₹32,000. Where did the extra ₹18,000 come from? There's no record.
+
+This breaks the **core audit trail** of a finance app. Every rupee in your balance should be traceable back to a transaction entry. Allowing a direct balance override would make the Insights page, Spending Charts, and Savings Rate calculations **unreliable** because they are all derived from actual transaction data — not the balance number stored on the account.
+
+### The Correct Way to "Adjust" a Balance
+
+If a user's real-world account balance differs from what the app shows (e.g., they forgot to log some old transactions), the right approach is to **add a corrective transaction** — for example:
+
+> **Title:** "Balance Adjustment"  
+> **Type:** Income (or Expense)  
+> **Amount:** The difference  
+> **Category:** Miscellaneous
+
+This keeps the ledger truthful and auditable, just like how real accounting systems handle adjustments via journal entries rather than direct number edits.
+
+### Why the Account Modal Allows Editing Other Fields
+
+The Edit Account modal lets you change the account's **Name, Type, Color, and Icon** — because these are purely cosmetic/metadata changes that have zero impact on financial calculations. Only the `balance` field is protected from direct user manipulation post-creation.
+
+---
+
+## 🖼 Screenshots
+
+> *(Add screenshots here to visually showcase the dashboard, insights page, and transaction list)*
+
+---
+
+## 📄 License
+
+This project was built for **evaluation and demonstration purposes**. Feel free to extend and adapt it for personal or commercial use.
+
+---
+
+*Built with ❤️ using React, TypeScript, and Tailwind CSS.*
