@@ -118,7 +118,6 @@ const ExpenseHeatmap = () => {
 
 // ─── Day of Week Spending Radar ───────────────────────────────────────────────
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const DAY_COLORS = ['#6366F1', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#3B82F6', '#EF4444'];
 
 const DayOfWeekChart = () => {
   const { transactions } = useTransactionStore();
@@ -182,7 +181,7 @@ const DayOfWeekChart = () => {
 const BurnRateForecast = () => {
   const { transactions } = useTransactionStore();
 
-  const { avgDailySpend, projectedSpend, income, daysInMonth, daysSoFar, status, statusLabel, overBy } = useMemo(() => {
+  const { avgDailySpend, projectedSpend, income, daysInMonth, daysSoFar, status, overBy } = useMemo(() => {
     const now = new Date();
     const monthStart = startOfMonth(now);
     const daysSoFar = now.getDate();
@@ -208,9 +207,7 @@ const BurnRateForecast = () => {
     if (ratio > 1) status = 'danger';
     else if (ratio > 0.8) status = 'warning';
 
-    const statusLabel = status === 'safe' ? 'On Track' : status === 'warning' ? 'Warning' : 'Over Budget';
-
-    return { avgDailySpend, projectedSpend, income, daysInMonth, daysSoFar, status, statusLabel, overBy };
+    return { avgDailySpend, projectedSpend, income, daysInMonth, daysSoFar, status, overBy };
   }, [transactions]);
 
   const progressPct = income > 0 ? Math.min((projectedSpend / income) * 100, 100) : 0;
@@ -303,10 +300,10 @@ const NeedVsWant = () => {
   const { transactions } = useTransactionStore();
   const categories = useCategoryStore(s => s.categories);
 
-  const { fixed, variable, other, total, fixedPct, variablePct, otherPct, needs50, wants30 } = useMemo(() => {
+  const { fixed, variable, fixedPct, variablePct, otherPct } = useMemo(() => {
     const now = new Date();
     const monthStart = startOfMonth(now);
-    let fixed = 0, variable = 0, other = 0;
+    let fixed = 0, variable = 0;
 
     transactions.forEach(t => {
       if (t.type !== 'expense') return;
@@ -318,16 +315,12 @@ const NeedVsWant = () => {
       else variable += t.amount; // default as variable
     });
 
-    const total = fixed + variable + other || 1;
+    const total = fixed + variable || 1;
     const fixedPct = Math.round((fixed / total) * 100);
     const variablePct = Math.round((variable / total) * 100);
     const otherPct = 100 - fixedPct - variablePct;
 
-    // 50/30/20 rule: Income not directly available here, estimate from expenses
-    const needs50 = total * 0.5;
-    const wants30 = total * 0.3;
-
-    return { fixed, variable, other, total, fixedPct, variablePct, otherPct, needs50, wants30 };
+    return { fixed, variable, fixedPct, variablePct, otherPct };
   }, [transactions, categories]);
 
   const barSegments = [
