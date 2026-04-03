@@ -493,7 +493,11 @@ The Edit Account modal lets you change the account's **Name, Type, Color, and Ic
 
 ## 🖼 Screenshots
 
-> *(Add screenshots here to visually showcase the dashboard, insights page, and transaction list)*
+![Dashboard Overview](public/dashboard.png)
+![Transactions List](public/transactions.png)
+![Accounts Management](public/accounts.png)
+![Settings Page](public/category.png)
+![Insights Page](public/insights.png)
 
 ---
 
