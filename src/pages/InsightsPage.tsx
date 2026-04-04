@@ -154,9 +154,9 @@ const DayOfWeekChart = () => {
               <Radar
                 name="Spent"
                 dataKey="amount"
-                stroke="#6366F1"
-                fill="#6366F1"
-                fillOpacity={0.35}
+                stroke="hsl(var(--primary))"
+                fill="hsl(var(--primary))"
+                fillOpacity={0.2}
                 strokeWidth={2}
               />
               <Tooltip
@@ -166,10 +166,10 @@ const DayOfWeekChart = () => {
             </RadarChart>
           </ResponsiveContainer>
         </div>
-        <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
-          <Flame className="h-4 w-4 text-indigo-400 shrink-0" />
-          <p className="text-xs text-indigo-300">
-            You spend <span className="font-bold text-indigo-200">{peakPct}%</span> of your weekly budget on <span className="font-bold text-indigo-200">{peakDay}</span>. Be mindful this {peakDay}!
+        <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-muted border">
+          <Flame className="h-4 w-4 text-primary shrink-0" />
+          <p className="text-xs text-muted-foreground">
+            You spend <span className="font-semibold text-foreground">{peakPct}%</span> of your total expenses on <span className="font-semibold text-foreground">{peakDay}s</span>. Be extra mindful on that day!
           </p>
         </div>
       </CardContent>
@@ -323,71 +323,140 @@ const NeedVsWant = () => {
     return { fixed, variable, fixedPct, variablePct, otherPct };
   }, [transactions, categories]);
 
-  const barSegments = [
-    { label: 'Needs (Fixed)', pct: fixedPct, color: 'bg-indigo-500', textColor: 'text-indigo-400', amount: fixed },
-    { label: 'Wants (Variable)', pct: variablePct, color: 'bg-rose-500', textColor: 'text-rose-400', amount: variable },
+  // 50/30/20 savings estimate: income - total expenses
+  const savingsPct = 100 - fixedPct - variablePct;
+
+  const segments = [
+    {
+      key: 'needs',
+      label: 'Needs',
+      sub: 'Essentials',
+      yourPct: fixedPct,
+      idealPct: 50,
+      amount: fixed,
+      barClass: 'bg-primary',
+      textClass: 'text-primary',
+      borderClass: 'border-primary/20',
+      bgClass: 'bg-primary/5',
+      examples: 'Rent, groceries, utilities, health, insurance',
+      description: 'Expenses you cannot skip — they are required for daily life.',
+    },
+    {
+      key: 'wants',
+      label: 'Wants',
+      sub: 'Lifestyle',
+      yourPct: variablePct,
+      idealPct: 30,
+      amount: variable,
+      barClass: 'bg-amber-500',
+      textClass: 'text-amber-600 dark:text-amber-400',
+      borderClass: 'border-amber-500/20',
+      bgClass: 'bg-amber-500/5',
+      examples: 'Dining out, entertainment, shopping, travel',
+      description: 'Flexible spending that improves your quality of life but can be reduced.',
+    },
+    {
+      key: 'savings',
+      label: 'Savings',
+      sub: 'Your Future',
+      yourPct: Math.max(savingsPct, 0),
+      idealPct: 20,
+      amount: 0,
+      barClass: 'bg-emerald-500',
+      textClass: 'text-emerald-600 dark:text-emerald-400',
+      borderClass: 'border-emerald-500/20',
+      bgClass: 'bg-emerald-500/5',
+      examples: 'Investments, emergency fund, retirement savings',
+      description: 'What remains after needs & wants — grow this over time.',
+    },
   ];
 
   return (
     <Card className="col-span-1 lg:col-span-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 hover:border-primary/40">
       <CardHeader>
-        <CardTitle className="text-base font-semibold">Needs vs Wants — 50/30/20 Rule Analysis</CardTitle>
+        <div>
+          <CardTitle className="text-base font-semibold">Spending Split — The 50/30/20 Rule</CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            A budgeting framework that divides your income into three simple buckets.
+            The goal is to keep <span className="font-medium text-foreground">Needs under 50%</span>, <span className="font-medium text-foreground">Wants under 30%</span>, and save at least <span className="font-medium text-foreground">20%</span>.
+          </p>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-5">
-        {/* Stacked bar */}
+      <CardContent className="space-y-6">
+
+        {/* Visual stacked bar */}
         <div className="space-y-2">
-          <div className="flex h-8 w-full rounded-lg overflow-hidden gap-0.5">
-            {barSegments.map((seg, i) => (
-              <div
-                key={i}
-                className={`${seg.color} flex items-center justify-center text-white text-xs font-semibold transition-all duration-700`}
-                style={{ width: `${seg.pct}%` }}
-                title={`${seg.label}: ${seg.pct}%`}
-              >
-                {seg.pct > 8 ? `${seg.pct}%` : ''}
-              </div>
-            ))}
+          <p className="text-xs font-medium text-muted-foreground">Your spending breakdown this month</p>
+          <div className="flex h-7 w-full rounded-lg overflow-hidden gap-0.5">
+            <div className="bg-primary flex items-center justify-center text-primary-foreground text-xs font-semibold transition-all duration-700" style={{ width: `${fixedPct}%` }}>
+              {fixedPct > 8 ? `${fixedPct}%` : ''}
+            </div>
+            <div className="bg-amber-500 flex items-center justify-center text-white text-xs font-semibold transition-all duration-700" style={{ width: `${variablePct}%` }}>
+              {variablePct > 8 ? `${variablePct}%` : ''}
+            </div>
             {otherPct > 0 && (
-              <div
-                className="bg-slate-500 flex items-center justify-center text-white text-xs"
-                style={{ width: `${otherPct}%` }}
-              />
+              <div className="bg-emerald-500 flex items-center justify-center text-white text-xs font-semibold" style={{ width: `${otherPct}%` }}>
+                {otherPct > 8 ? `${otherPct}%` : ''}
+              </div>
             )}
           </div>
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Needs</span>
-            <span>Wants</span>
+          <div className="flex gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-primary inline-block" />Needs</span>
+            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-amber-500 inline-block" />Wants</span>
+            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block" />Savings (est.)</span>
           </div>
         </div>
 
-        {/* Breakdown grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {barSegments.map((seg, i) => (
-            <div key={i} className={`p-4 rounded-xl border ${i === 0 ? 'border-indigo-500/20 bg-indigo-500/5' : 'border-rose-500/20 bg-rose-500/5'}`}>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${seg.color}`} />
-                  <span className="text-sm font-semibold">{seg.label}</span>
+        {/* Three bucket cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {segments.map((seg) => {
+            const isOver = seg.key !== 'savings' && seg.yourPct > seg.idealPct;
+            const barWidth = Math.min((seg.yourPct / (seg.idealPct * 1.5)) * 100, 100);
+            return (
+              <div key={seg.key} className={`p-4 rounded-xl border ${seg.borderClass} ${seg.bgClass} space-y-3`}>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-semibold text-sm">{seg.label}</p>
+                    <p className="text-xs text-muted-foreground">{seg.sub}</p>
+                  </div>
+                  <div className={`text-right shrink-0`}>
+                    <p className={`text-lg font-bold tabular-nums ${seg.textClass}`}>{seg.yourPct}%</p>
+                    <p className="text-xs text-muted-foreground">ideal ≤{seg.idealPct}%</p>
+                  </div>
                 </div>
-                <span className={`text-lg font-bold tabular-nums ${seg.textColor}`}>{formatCurrency(seg.amount)}</span>
+
+                {/* Mini progress bar */}
+                <div className="space-y-1">
+                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                    <div className={`h-full ${seg.barClass} rounded-full transition-all duration-700`} style={{ width: `${barWidth}%` }} />
+                  </div>
+                  <p className={`text-xs font-medium ${isOver ? 'text-rose-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                    {isOver ? `⚠️ ${seg.yourPct - seg.idealPct}% above target` : `✅ Within target`}
+                  </p>
+                </div>
+
+                <div className="border-t pt-3 space-y-1">
+                  <p className="text-xs text-muted-foreground">{seg.description}</p>
+                  <p className="text-xs text-muted-foreground"><span className="font-medium text-foreground">Examples:</span> {seg.examples}</p>
+                </div>
               </div>
-              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                <div className={`h-full ${seg.color} rounded-full`} style={{ width: `${seg.pct}%` }} />
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {i === 0
-                  ? `Ideal: ≤50% — You're at ${fixedPct}% ${fixedPct <= 50 ? '✅' : '⚠️'}`
-                  : `Ideal: ≤30% — You're at ${variablePct}% ${variablePct <= 30 ? '✅' : '⚠️'}`}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* 50/30/20 summary info */}
+        {/* What does this mean for me? */}
+        <div className="p-4 rounded-xl border bg-muted/40 space-y-2">
+          <p className="text-sm font-semibold">What does the 50/30/20 rule mean for you?</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Think of your monthly income split into just 3 buckets. Half goes to things you <em>must</em> pay (rent, food, bills). Three-tenths goes to things you <em>enjoy</em> (restaurants, Netflix, clothes). The remaining fifth goes to your <em>future self</em> (savings, investments). If your Needs bucket is over 50%, look for ways to reduce fixed costs. If your Wants bucket is over 30%, cut discretionary spending first — it's the easiest lever to pull.
+          </p>
+        </div>
+
+        {/* Hidden original summary — for reference removed */}
         <div className="p-3 rounded-lg bg-muted/50 border text-xs text-muted-foreground space-y-1">
-          <p className="font-semibold text-foreground text-sm">📐 50/30/20 Budget Rule</p>
-          <p><span className="font-medium text-indigo-400">50% Needs:</span> Rent, bills, groceries, health — essentials you can't avoid.</p>
-          <p><span className="font-medium text-rose-400">30% Wants:</span> Dining out, entertainment, shopping — lifestyle spending.</p>
+          <p className="font-semibold text-foreground text-sm">Quick Reference</p>
+          <p><span className="font-medium text-primary">50% Needs:</span> Rent, bills, groceries, health — essentials you can't avoid.</p>
+          <p><span className="font-medium text-amber-600 dark:text-amber-400">30% Wants:</span> Dining out, entertainment, shopping — lifestyle spending.</p>
           <p><span className="font-medium text-emerald-400">20% Savings:</span> Whatever stays after needs & wants — your future wealth.</p>
         </div>
       </CardContent>
