@@ -252,7 +252,8 @@ export const BudgetPage = () => {
             <div className="space-y-2">
               <label className="text-sm font-medium">Category</label>
               <select
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                style={{ colorScheme: 'inherit' }}
                 value={form.categoryId}
                 onChange={e => setForm({ ...form, categoryId: e.target.value })}
                 disabled={!!editingId}
@@ -272,7 +273,7 @@ export const BudgetPage = () => {
                 type="number"
                 min="1"
                 step="100"
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 placeholder="e.g. 5000"
                 value={form.limit}
                 onChange={e => setForm({ ...form, limit: e.target.value })}

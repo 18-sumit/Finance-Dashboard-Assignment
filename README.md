@@ -8,19 +8,21 @@ A modern, full-featured **personal finance management dashboard** built with Rea
 
 - [Overview](#-overview)
 - [Tech Stack](#-tech-stack)
-- [Setup & Installation](#-setup--installation)
+- [Setup & Installation](#%EF%B8%8F-setup--installation)
 - [Project Structure](#-project-structure)
 - [Features](#-features)
   - [Dashboard](#1-dashboard)
   - [Transactions](#2-transactions)
   - [Accounts](#3-accounts)
-  - [Insights](#4-insights)
-  - [Categories](#5-categories)
+  - [Categories](#4-categories)
+  - [Budget Planner](#5-budget-planner-)
+  - [Insights & Analytics](#6-insights--analytics)
 - [State Management Approach](#-state-management-approach)
 - [Design System](#-design-system)
 - [Role-Based Access](#-role-based-access)
 - [Data Persistence](#-data-persistence)
 - [Exporting Data](#-exporting-data)
+- [Design Decision: Balance Immutability](#-design-decision-why-you-cant-change-an-accounts-balance-directly)
 
 ---
 
@@ -69,8 +71,8 @@ The application is entirely **client-side** — no backend or API is needed. All
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/zorvyn-finance-dashboard.git
-cd zorvyn-finance-dashboard/finance-dashboard
+git clone https://github.com/18-sumit/Finance-Dashboard-Assignment.git
+cd Finance-Dashboard-Assignment
 
 # 2. Install all dependencies
 npm install
@@ -105,58 +107,62 @@ npm run lint
 ## 📁 Project Structure
 
 ```
-finance-dashboard/
+Finance-Dashboard-Assignment/
 ├── public/
 ├── src/
 │   ├── components/
 │   │   ├── accounts/
-│   │   │   ├── AccountCard.tsx        # Single account display card
-│   │   │   └── AccountModal.tsx       # Add/Edit account dialog
+│   │   │   ├── AccountCard.tsx           # Single account display card
+│   │   │   └── AccountModal.tsx          # Add/Edit account dialog
 │   │   ├── dashboard/
-│   │   │   ├── AccountBalances.tsx    # Horizontal scrollable account list
-│   │   │   ├── BalanceTrendChart.tsx  # 6-month area chart
-│   │   │   ├── RecentTransactions.tsx # Last 5 transactions widget
-│   │   │   ├── SpendingBreakdown.tsx  # Donut chart by category
-│   │   │   └── SummaryCards.tsx       # KPI metric cards (balance, income, expense, savings)
+│   │   │   ├── AccountBalances.tsx       # Horizontal scrollable account list
+│   │   │   ├── BalanceTrendChart.tsx     # 6-month area chart
+│   │   │   ├── BudgetSummaryWidget.tsx   # Compact budget health preview card
+│   │   │   ├── RecentTransactions.tsx   # Last 5 transactions widget
+│   │   │   ├── SpendingBreakdown.tsx    # Donut chart by category
+│   │   │   └── SummaryCards.tsx         # KPI metric cards (balance, income, expense, savings)
 │   │   ├── layout/
-│   │   │   ├── Header.tsx             # Sticky top bar with theme toggle & role switcher
-│   │   │   ├── Layout.tsx             # Root layout (sidebar + main area)
-│   │   │   └── Sidebar.tsx            # Fixed navigation sidebar
+│   │   │   ├── Header.tsx               # Sticky top bar — theme, role, profile dropdown
+│   │   │   ├── Layout.tsx               # Root layout — collapsible sidebar + main area
+│   │   │   └── Sidebar.tsx              # Collapsible sidebar (icon-only ↔ full width)
 │   │   └── ui/
-│   │       ├── AmountBadge.tsx        # Color-coded amount display (+/-)
-│   │       ├── CategoryIcon.tsx       # Dynamic icon + label from category store
-│   │       ├── ConfirmDialog.tsx      # Reusable confirmation dialog
-│   │       ├── EmptyState.tsx         # Zero-state UI with action CTA
-│   │       ├── button.tsx             # Radix Slot-based button variants
-│   │       ├── card.tsx               # Card + CardHeader + CardContent
-│   │       ├── dialog.tsx             # Radix Dialog wrapper
-│   │       ├── dropdown-menu.tsx      # Radix DropdownMenu wrapper
-│   │       └── select.tsx             # Radix Select wrapper
+│   │       ├── AmountBadge.tsx          # Color-coded amount display (+/-)
+│   │       ├── CategoryIcon.tsx         # Dynamic icon + label from category store
+│   │       ├── ConfirmDialog.tsx        # Reusable confirmation dialog
+│   │       ├── EmptyState.tsx           # Zero-state UI with action CTA
+│   │       ├── button.tsx               # Radix Slot-based button variants
+│   │       ├── card.tsx                 # Card + CardHeader + CardContent
+│   │       ├── dialog.tsx               # Radix Dialog wrapper
+│   │       ├── dropdown-menu.tsx        # Radix DropdownMenu wrapper
+│   │       └── select.tsx               # Radix Select wrapper
 │   ├── hooks/
-│   │   ├── useInsights.ts             # Aggregated financial metrics hook
-│   │   └── useTransactions.ts         # Filtered + paginated transaction hook
+│   │   ├── useInsights.ts               # Aggregated financial metrics hook
+│   │   └── useTransactions.ts           # Filtered + paginated transaction hook
 │   ├── lib/
-│   │   ├── categories.ts              # Default category definitions
-│   │   ├── formatters.ts              # Currency & percentage formatters
-│   │   ├── mockData.ts                # Seed data for initial launch
-│   │   └── utils.ts                   # cn() utility (clsx + tailwind-merge)
+│   │   ├── categories.ts                # Default category definitions
+│   │   ├── formatters.ts                # Currency & percentage formatters
+│   │   ├── mockData.ts                  # Seed data (35 transactions across 4 accounts)
+│   │   └── utils.ts                     # cn() utility (clsx + tailwind-merge)
 │   ├── pages/
-│   │   ├── AccountsPage.tsx           # Account management page
-│   │   ├── CategoriesPage.tsx         # Category management page
-│   │   ├── DashboardPage.tsx          # Overview / home page
-│   │   ├── InsightsPage.tsx           # Analytics & behavioral insights
-│   │   └── TransactionsPage.tsx       # Full transaction list with filter/pagination
+│   │   ├── AccountsPage.tsx             # Account management
+│   │   ├── BudgetPage.tsx               # Budget planner — per-category monthly limits
+│   │   ├── CategoriesPage.tsx           # Category management
+│   │   ├── DashboardPage.tsx            # Overview with budget widget
+│   │   ├── InsightsPage.tsx             # Analytics & behavioral insights
+│   │   └── TransactionsPage.tsx         # Full transaction list with filter/pagination
 │   ├── stores/
-│   │   ├── accountStore.ts            # Account CRUD + balance management
-│   │   ├── categoryStore.ts           # Category CRUD (persisted)
-│   │   ├── filterStore.ts             # Global transaction filter state
-│   │   ├── transactionStore.ts        # Transaction CRUD (persisted)
-│   │   └── uiStore.ts                 # Theme, role, sidebar open state
+│   │   ├── accountStore.ts              # Account CRUD + balance management
+│   │   ├── budgetStore.ts               #Per-category monthly budget limits (persisted)
+│   │   ├── categoryStore.ts             # Category CRUD (persisted)
+│   │   ├── filterStore.ts               # Global transaction filter state
+│   │   ├── transactionStore.ts          # Transaction CRUD (persisted)
+│   │   └── uiStore.ts                   # Theme, role, sidebar collapsed state
 │   ├── types/
-│   │   └── index.ts                   # TypeScript interfaces for core entities
-│   ├── App.tsx                        # Router configuration
-│   ├── main.tsx                       # React entry point
-│   └── index.css                      # Global base styles + custom scrollbar
+│   │   └── index.ts                     # TypeScript interfaces for core entities
+│   ├── App.tsx                          # Router configuration
+│   ├── main.tsx                         # React entry point
+│   └── index.css                        # Global base styles + custom scrollbar
+├── vercel.json                          # SPA rewrite rule for Vercel deployment
 ├── package.json
 ├── tailwind.config.js
 ├── tsconfig.json
@@ -341,17 +347,113 @@ Manage the taxonomy of your spending.
 
 ---
 
+### 5. Budget Planner 🎯
+
+**Route:** `/budget`
+
+The Budget Planner lets users set **monthly spending limits per category** and tracks real-time progress against those limits. This is one of the most impactful features for personal finance discipline.
+
+#### How It Works
+For each spending category, an Admin sets a monthly cap (e.g., ₹5,000 for Food). The app then automatically compares all this month's actual expenses in that category against the cap — updating in real time as new transactions are added.
+
+#### Budget Summary Cards
+Three KPI cards at the top of the page:
+- **Total Budget** — Sum of all category limits set for the month
+- **Spent This Month** — Total actual spending across budgeted categories
+- **Remaining** — Budget remaining, with a warning count if any categories are over-limit
+
+#### Overall Budget Health Bar
+A single master progress bar showing total spend as a % of total budget:
+- 🟢 **Green** — Under 80% utilized
+- 🟡 **Amber** — 80–99% utilized (approaching limit)
+- 🔴 **Red** — 100%+ (over budget)
+
+#### Per-Category Budget Cards
+Each budget entry gets its own card showing:
+- **Category name & icon** (resolved from the category store)
+- **Amount spent** (color-coded by status — green/amber/red)
+- **Monthly limit set by admin**
+- **Animated progress bar** transitioning green → amber → red
+- **Percentage used** and **amount remaining or over**
+- **Status badge** — *"On Track"*, *"Warning — nearing limit"*, or *"Over Budget — over by ₹X"*
+- **Edit / Delete buttons** on hover (Admin only)
+
+#### Set / Edit Budget Modal *(Admin only)*
+- Select any unbudgeted category from an auto-filtered dropdown (already-budgeted ones are excluded)
+- Enter the monthly limit in ₹
+- **Live preview bar** — shows the current month's spend vs the new limit before confirming
+- Inline color-coded status updates as you type the limit amount
+
+#### Dashboard Budget Widget
+A compact **"Budget Overview"** card lives on the Dashboard page alongside Recent Transactions. It shows the top 5 highest-burn categories with mini progress bars and a direct **"Manage →"** link to the Budget page.
+
+#### Empty State
+When no budgets are set yet, a friendly zero-state screen is displayed with a Target icon and a call-to-action button: *"Set Your First Budget"*.
+
+#### Data Model
+```ts
+interface Budget {
+  categoryId: string;  // Links to an existing category in the categoryStore
+  limit: number;       // Monthly spending cap in ₹
+}
+```
+Stored in `budgetStore` (`src/stores/budgetStore.ts`) and persisted to `localStorage` under the key `finance-budget-storage`.
+
+---
+
+### 6. Insights & Analytics
+
+**Route:** `/insights`
+
+The most feature-rich page — 7 distinct analytical panels:
+
+#### Top Category
+- Highlights the **single category** where the user has spent the most this month
+- Large centered icon, label, and total amount
+
+#### Savings Rate Tracker
+- Circular ring visualization displaying this month's savings rate
+- Status message: *"On Track ✅"* or *"Needs attention ⚠️"*
+
+#### Month Comparison Bar Chart
+- Side-by-side bars comparing **last month vs this month** income and expenses
+
+#### Expense Heatmap *(90 Days)*
+- GitHub-style contribution heatmap (7 rows × ~13 columns)
+- Color intensity reflects daily spending magnitude (⬜ none → 🟡 low → 🟠 medium → 🔴 high)
+- **Hover tooltip** shows: Date, Total Spent, Transaction Count
+- **Click** any cell to jump to Transactions with that date pre-filtered
+
+#### 🆕 Day of Week Spending Radar
+- **Radar chart** plotting spend across Mon–Sun
+- Identifies the most expensive day of the week
+- Callout: *"You spend 42% of your total expenses on Saturdays. Be extra mindful on that day!"*
+
+#### 🆕 Burn Rate & Forecast
+- Calculates **Average Daily Spend** from month start to today
+- Projects total spend at current rate to end of month
+- **Animated progress bar** — green / amber / red based on projected vs income
+- Companion bar chart comparing Income vs Projected Spend
+
+#### 🆕 Spending Split — 50/30/20 Rule
+- Classifies expenses into **Needs** (rent, health, utilities), **Wants** (dining, shopping, entertainment), and estimates **Savings** bucket
+- Three dedicated cards per bucket: your%, ideal%, mini progress bar, ✅/⚠️ status, examples, and description in plain language
+- **"What does this mean for you?"** panel explains the rule in conversational, jargon-free language
+
+---
+
 ## 🧠 State Management Approach
 
-The app uses **Zustand** — a lightweight, zero-boilerplate state management library. There are 5 stores:
+The app uses **Zustand** — a lightweight, zero-boilerplate state management library. There are **6 stores**:
 
 | Store | Purpose | Persisted |
 |-------|---------|-----------|
 | `transactionStore` | Transaction CRUD + account balance sync | ✅ localStorage |
 | `accountStore` | Account CRUD + balance update method | ✅ localStorage |
 | `categoryStore` | Category CRUD with default seed | ✅ localStorage |
+| `budgetStore` | Per-category monthly spending limits | ✅ localStorage |
 | `filterStore` | Active filter state (search, type, category, date preset, date range) | ❌ Session only |
-| `uiStore` | Theme (dark/light), Role (admin/viewer), Sidebar open/close | ✅ localStorage |
+| `uiStore` | Theme (dark/light), Role (admin/viewer), Sidebar collapsed state | ✅ localStorage |
 
 ### Cross-Store Balance Sync
 When a transaction is added, edited, or deleted, `transactionStore` directly calls `accountStore.getState().updateBalance()` to keep account balances accurate without needing React context waterfalls or prop drilling.
@@ -395,7 +497,7 @@ The app supports two roles, toggled from the Header:
 
 | Feature | Admin | Viewer |
 |---------|-------|--------|
-| View all pages | ✅ | ✅ |
+| View all pages & data | ✅ | ✅ |
 | Add transactions | ✅ | ❌ |
 | Edit transactions | ✅ | ❌ |
 | Delete transactions | ✅ | ❌ |
@@ -403,6 +505,8 @@ The app supports two roles, toggled from the Header:
 | Export CSV / JSON | ✅ | ❌ |
 | Add/Edit/Delete accounts | ✅ | ❌ |
 | Add/Edit/Delete categories | ✅ | ❌ |
+| Set/Edit/Delete budgets | ✅ | ❌ |
+| View budget progress | ✅ | ✅ |
 
 Role state is stored in `uiStore` and persisted — the UI dynamically shows/hides action buttons, modals, and interactive features based on the active role.
 
@@ -417,7 +521,8 @@ All core data persists to `localStorage` via Zustand `persist` middleware:
 | `finance-transaction-storage` | All transaction records |
 | `finance-account-storage` | All account records + balances |
 | `finance-category-storage` | All custom and default categories |
-| `finance-ui-storage` | Theme preference, active role |
+| `finance-budget-storage` | All per-category monthly budget limits |
+| `finance-ui-storage` | Theme preference, active role, sidebar collapsed state |
 
 **To reset all data** to factory mock data, use the "Reset to Mock Data" button (Admin only) which calls `transactionStore.resetAll()`.
 
@@ -496,8 +601,10 @@ The Edit Account modal lets you change the account's **Name, Type, Color, and Ic
 ![Dashboard Overview](public/dashboard.png)
 ![Transactions List](public/transactions.png)
 ![Accounts Management](public/accounts.png)
-![Settings Page](public/category.png)
+![Categories Page](public/categories.png)
+![Budget Page](public/budget.png) 
 ![Insights Page](public/insights.png)
+![Insights Page](public/insights2.png)
 
 ---
 
