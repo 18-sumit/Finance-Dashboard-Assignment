@@ -12,7 +12,7 @@ export interface Account {
   createdAt: string;
 }
 
-export type TransactionType = 'income' | 'expense' | 'transfer';
+export type TransactionType = 'income' | 'expense';
 
 export type Category = string;
 

@@ -3,7 +3,7 @@ export type DatePreset = 'all' | 'this_month' | 'last_month' | '3_months' | '6_m
 
 export interface FilterState {
   search: string;
-  type: 'all' | 'income' | 'expense' | 'transfer';
+  type: 'all' | 'income' | 'expense';
   category: string;
   accountId: string;
   datePreset: DatePreset;

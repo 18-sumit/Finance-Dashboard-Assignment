@@ -125,9 +125,9 @@ export const BudgetPage = () => {
               <span className="text-xs text-muted-foreground">Remaining</span>
               <span className="text-2xl font-bold tabular-nums text-foreground">{formatCurrency(Math.max(summary.totalLimit - summary.totalSpent, 0))}</span>
               {summary.overCount > 0 && (
-                <span className="text-xs text-rose-500">{summary.overCount} categor{summary.overCount > 1 ? 'ies' : 'y'} over limit ⚠️</span>
+                <span className="text-xs text-rose-500">{summary.overCount} categor{summary.overCount > 1 ? 'ies' : 'y'} over limit</span>
               )}
-              {summary.overCount === 0 && <span className="text-xs text-emerald-500">All categories within limits ✅</span>}
+              {summary.overCount === 0 && <span className="text-xs text-emerald-500">All categories within limits </span>}
             </CardContent>
           </Card>
         </div>

@@ -431,7 +431,7 @@ const NeedVsWant = () => {
                     <div className={`h-full ${seg.barClass} rounded-full transition-all duration-700`} style={{ width: `${barWidth}%` }} />
                   </div>
                   <p className={`text-xs font-medium ${isOver ? 'text-rose-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                    {isOver ? `⚠️ ${seg.yourPct - seg.idealPct}% above target` : `✅ Within target`}
+                    {isOver ? ` ${seg.yourPct - seg.idealPct}% above target` : `Within target`}
                   </p>
                 </div>
 
@@ -513,7 +513,7 @@ export const InsightsPage = () => {
              <div className="w-40 h-40 rounded-full border-[16px] border-muted flex items-center justify-center relative">
                 <span className="text-3xl font-bold text-amber-500">{formatPercentage(savingsRateThisMonth)}</span>
              </div>
-             <p className="mt-4 text-sm font-medium">{savingsRateThisMonth > 20 ? 'On Track ✅' : 'Needs attention ⚠️'}</p>
+             <p className="mt-4 text-sm font-medium">{savingsRateThisMonth > 20 ? 'On Track ' : 'Needs attention !!'}</p>
           </CardContent>
         </Card>
 
