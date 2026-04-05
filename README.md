@@ -225,7 +225,7 @@ Full transaction ledger with advanced management capabilities.
 Multiple simultaneous filters:
 - **Search** — fuzzy search by transaction title or date string
 - **Category** — filter by specific spending category
-- **Type** — All / Income / Expense / Transfer
+- **Type** — All / Income / Expense
 - **Time Preset** — This Month / Last Month / Last 3 / 6 / 9 Months / 1 Year
 - **Date Range** — Precise from/to date picker
 
@@ -237,7 +237,7 @@ All filters are managed via the global `filterStore` (Zustand), so filter state 
 - Displays current page range (e.g., "Showing 1–15 of 48 transactions")
 
 #### Add Transaction
-- Full modal dialog with fields: Title, Amount, Type (Income/Expense/Transfer), Category, Account, Date, Notes
+- Full modal dialog with fields: Title, Amount, Type (Income/Expense), Category, Account, Date, Notes
 - On save, the linked account's balance updates **automatically**
 
 #### Export to CSV / JSON *(Admin only)*
@@ -276,57 +276,7 @@ Manage all your wallets, bank accounts, and credit cards.
 
 ---
 
-### 4. Insights
-
-**Route:** `/insights`
-
-The most feature-rich page — 7 distinct analytical panels:
-
-#### Top Category
-- Highlights the **single category** where the user has spent the most this month
-- Large centered icon, label, and total amount
-
-#### Savings Rate Tracker
-- Circular ring visualization displaying this month's savings rate
-- Status message: *"On Track ✅"* or *"Needs attention ⚠️"*
-
-#### Month Comparison Bar Chart
-- Side-by-side bars comparing **last month vs this month** income and expenses
-
-#### Expense Heatmap *(90 Days)*
-- GitHub-style contribution heatmap (7 rows × ~13 columns grid)
-- Each cell represents one day; color intensity reflects spending magnitude
-  - ⬜ No spend → 🟡 Low → 🟠 Medium → 🔴 High
-- **Hover tooltip** shows: Date, Total Spent, Transaction Count
-- **Click** any cell to instantly jump to Transactions page with that date pre-filtered
-- Month labels positioned below matching their column
-
-#### 🆕 Day of Week Spending Radar
-- **Radar (spider-web) chart** plotting average spend across Mon–Sun
-- Identifies the user's most expensive day of the week
-- Dynamic callout: *"You spend 42% of your weekly budget on Saturdays. Be mindful this Saturday!"*
-
-#### 🆕 Burn Rate & Forecast
-- Calculates **Average Daily Spend** from month start to today
-- Projects total spend if the current rate continues to month end
-- **Animated progress bar** with dynamic color:
-  - 🟢 Green: projected < 80% of income
-  - 🟡 Amber: projected 80–100% of income
-  - 🔴 Red: projected > 100% of income (over budget)
-- Companion bar chart comparing Income vs Projected Spend
-- Smart status message: plaintext forecast explanation
-
-#### 🆕 Needs vs Wants — 50/30/20 Rule Analysis
-- Classifies all this month's expenses into:
-  - **Needs (Fixed):** Rent, health, utilities, insurance, groceries, education, EMIs
-  - **Wants (Variable):** Entertainment, dining out, shopping, travel, subscriptions
-- **Horizontal stacked bar** showing the visual ratio split
-- Two detail cards with mini progress bars and ideal-vs-actual check indicators (✅/⚠️)
-- Educational callout explaining the 50/30/20 rule for financial literacy
-
----
-
-### 5. Categories
+### 4. Categories
 
 **Route:** `/categories`
 
@@ -347,7 +297,7 @@ Manage the taxonomy of your spending.
 
 ---
 
-### 5. Budget Planner 🎯
+### 5. Budget Planner
 
 **Route:** `/budget`
 
@@ -419,26 +369,35 @@ The most feature-rich page — 7 distinct analytical panels:
 - Side-by-side bars comparing **last month vs this month** income and expenses
 
 #### Expense Heatmap *(90 Days)*
-- GitHub-style contribution heatmap (7 rows × ~13 columns)
-- Color intensity reflects daily spending magnitude (⬜ none → 🟡 low → 🟠 medium → 🔴 high)
+- GitHub-style contribution heatmap (7 rows × ~13 columns grid)
+- Each cell represents one day; color intensity reflects spending magnitude
+  - ⬜ No spend → 🟡 Low → 🟠 Medium → 🔴 High
 - **Hover tooltip** shows: Date, Total Spent, Transaction Count
-- **Click** any cell to jump to Transactions with that date pre-filtered
+- **Click** any cell to instantly jump to Transactions page with that date pre-filtered
+- Month labels positioned below matching their column
 
 #### 🆕 Day of Week Spending Radar
-- **Radar chart** plotting spend across Mon–Sun
-- Identifies the most expensive day of the week
-- Callout: *"You spend 42% of your total expenses on Saturdays. Be extra mindful on that day!"*
+- **Radar (spider-web) chart** plotting average spend across Mon–Sun
+- Identifies the user's most expensive day of the week
+- Dynamic callout: *"You spend 42% of your weekly budget on Saturdays. Be mindful this Saturday!"*
 
 #### 🆕 Burn Rate & Forecast
 - Calculates **Average Daily Spend** from month start to today
-- Projects total spend at current rate to end of month
-- **Animated progress bar** — green / amber / red based on projected vs income
+- Projects total spend if the current rate continues to month end
+- **Animated progress bar** with dynamic color:
+  - 🟢 Green: projected < 80% of income
+  - 🟡 Amber: projected 80–100% of income
+  - 🔴 Red: projected > 100% of income (over budget)
 - Companion bar chart comparing Income vs Projected Spend
+- Smart status message: plaintext forecast explanation
 
-#### 🆕 Spending Split — 50/30/20 Rule
-- Classifies expenses into **Needs** (rent, health, utilities), **Wants** (dining, shopping, entertainment), and estimates **Savings** bucket
-- Three dedicated cards per bucket: your%, ideal%, mini progress bar, ✅/⚠️ status, examples, and description in plain language
-- **"What does this mean for you?"** panel explains the rule in conversational, jargon-free language
+#### 🆕 Needs vs Wants — 50/30/20 Rule Analysis
+- Classifies all this month's expenses into:
+  - **Needs (Fixed):** Rent, health, utilities, insurance, groceries, education, EMIs
+  - **Wants (Variable):** Entertainment, dining out, shopping, travel, subscriptions
+- **Horizontal stacked bar** showing the visual ratio split
+- Two detail cards with mini progress bars and ideal-vs-actual check indicators (✅/⚠️)
+- Educational callout explaining the 50/30/20 rule for financial literacy
 
 ---
 
