@@ -48,7 +48,6 @@ export const TransactionFilters = () => {
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="income">Income</SelectItem>
             <SelectItem value="expense">Expense</SelectItem>
-            <SelectItem value="transfer">Transfer</SelectItem>
           </SelectContent>
         </Select>
 

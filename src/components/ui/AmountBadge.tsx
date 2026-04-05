@@ -3,7 +3,7 @@ import { formatCurrency } from '../../lib/formatters';
 
 interface AmountBadgeProps {
   amount: number;
-  type: 'income' | 'expense' | 'transfer';
+  type: 'income' | 'expense';
   className?: string;
 }
 
@@ -17,7 +17,7 @@ export const AmountBadge = ({ amount, type, className }: AmountBadgeProps) => {
       isIncome ? 'text-emerald-500' : 'text-rose-500',
       className
     )}>
-      {type !== 'transfer' ? prefix : ''}{formatCurrency(amount)}
+      {prefix}{formatCurrency(amount)}
     </span>
   );
 };

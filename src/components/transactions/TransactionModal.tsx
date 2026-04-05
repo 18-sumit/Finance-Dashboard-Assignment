@@ -72,7 +72,6 @@ export const TransactionModal = ({ open, onOpenChange, transaction, onSave }: Tr
                 <SelectContent>
                   <SelectItem value="expense">Expense</SelectItem>
                   <SelectItem value="income">Income</SelectItem>
-                  <SelectItem value="transfer">Transfer</SelectItem>
                 </SelectContent>
               </Select>
             </div>
