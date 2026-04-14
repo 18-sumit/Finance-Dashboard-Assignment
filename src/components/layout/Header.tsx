@@ -5,9 +5,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Role } from '../../types';
 import { toast } from 'sonner';
 import { cn } from '../../lib/utils';
+import { useAuthStore } from '../../stores/authStore';
 
 export const Header = () => {
   const { role, setRole, toggleSidebar, theme, toggleTheme } = useUIStore();
+  const { user, signOut } = useAuthStore();
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -30,9 +32,20 @@ export const Header = () => {
   }, []);
 
   const isAdmin = role === 'admin';
-  const displayName = isAdmin ? 'Admin' : 'Viewer';
-  const displayEmail = isAdmin ? 'admin@zentrix.com' : 'viewer@zentrix.com';
-  const avatarLetter = isAdmin ? 'A' : 'V';
+  const displayName = user?.email?.split('@')[0] || (isAdmin ? 'Admin' : 'Viewer');
+  const displayEmail = user?.email || (isAdmin ? 'admin@zentrix.com' : 'viewer@zentrix.com');
+  const avatarLetter = (displayName[0] || 'U').toUpperCase();
+
+  const handleSignOut = async () => {
+    const result = await signOut();
+    if (result.error) {
+      toast.error('Sign out failed', { description: result.error });
+      return;
+    }
+
+    setProfileOpen(false);
+    toast.success('Signed out successfully');
+  };
 
   return (  
     <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6 shadow-sm z-30 sticky top-0">
@@ -126,11 +139,11 @@ export const Header = () => {
                   Switch to {isAdmin ? 'Viewer' : 'Admin'} mode
                 </button>
                 <button
-                  onClick={() => setProfileOpen(false)}
+                  onClick={handleSignOut}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
                 >
                   <LogOut className="h-4 w-4" />
-                  Close
+                  Sign Out
                 </button>
               </div>
             </div>
