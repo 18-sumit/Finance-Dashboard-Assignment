@@ -4,23 +4,24 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { useTransactionStore } from '../../stores/transactionStore';
 import { format, subMonths, isAfter } from 'date-fns';
 import { formatCurrency } from '../../lib/formatters';
+import { EmptyState } from '../ui/EmptyState';
+import { TrendingUp } from 'lucide-react';
 
 export const BalanceTrendChart = () => {
   const { transactions } = useTransactionStore();
 
   const data = useMemo(() => {
-    // Generate an array of the last 6 months
     const result = Array.from({ length: 6 }).map((_, i) => {
       const d = subMonths(new Date(), 5 - i);
       return { monthStr: format(d, 'MMM'), yearMonth: format(d, 'yyyy-MM'), balance: 0 };
     });
 
-    // We calculate a running cumulative net. This is illustrative for this component.
-    // In a real app we'd query initial balance and apply net changes over time.
-    // Assuming starting balance is 100k for the chart visualization.
-    let cumulative = 100000; 
+    if (transactions.length === 0) {
+      return result;
+    }
 
-    // Sort ascending
+    let cumulative = 0;
+
     const sorted = [...transactions].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     const cutoff = subMonths(new Date(), 5);
 
@@ -32,6 +33,12 @@ export const BalanceTrendChart = () => {
     });
 
     result.forEach((r) => {
+      const monthTransactions = sorted.filter((t) => format(new Date(t.date), 'yyyy-MM') === r.yearMonth);
+      if (monthTransactions.length === 0) {
+        r.balance = cumulative;
+        return;
+      }
+
       sorted.forEach((t) => {
         if (format(new Date(t.date), 'yyyy-MM') === r.yearMonth) {
           cumulative += t.type === 'income' ? t.amount : -t.amount;
@@ -42,6 +49,23 @@ export const BalanceTrendChart = () => {
 
     return result;
   }, [transactions]);
+
+  if (transactions.length === 0) {
+    return (
+      <Card className="col-span-2 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 hover:border-primary/40 group">
+        <CardHeader>
+          <CardTitle className="text-base font-semibold">Balance Trend</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EmptyState
+            icon={TrendingUp}
+            title="No balance history yet"
+            description="Add your first income or expense transaction to see the trend chart."
+          />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="col-span-2 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 hover:border-primary/40 group">
