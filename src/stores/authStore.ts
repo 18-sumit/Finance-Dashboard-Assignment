@@ -9,9 +9,20 @@ interface AuthState {
   loading: boolean;
   error: string | null;
   initialize: () => Promise<(() => void) | void>;
+  signInWithPassword: (email: string, password: string) => Promise<{ error?: string }>;
+  signUpWithPassword: (email: string, password: string) => Promise<{ error?: string }>;
   signInWithOtp: (email: string) => Promise<{ error?: string }>;
   signOut: () => Promise<{ error?: string }>;
 }
+
+const getAuthRedirectUrl = () => {
+  const envRedirect = import.meta.env.VITE_AUTH_REDIRECT_URL as string | undefined;
+  if (envRedirect && envRedirect.trim().length > 0) {
+    return envRedirect.trim();
+  }
+
+  return window.location.origin;
+};
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
@@ -48,6 +59,45 @@ export const useAuthStore = create<AuthState>((set) => ({
     return () => listener.subscription.unsubscribe();
   },
 
+  signInWithPassword: async (email, password) => {
+    if (!isSupabaseConfigured || !supabase) {
+      const error = 'Supabase env vars are missing.';
+      set({ error });
+      return { error };
+    }
+
+    set({ loading: true, error: null });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    set({ loading: false, error: error?.message ?? null });
+    if (error) return { error: error.message };
+    return {};
+  },
+
+  signUpWithPassword: async (email, password) => {
+    if (!isSupabaseConfigured || !supabase) {
+      const error = 'Supabase env vars are missing.';
+      set({ error });
+      return { error };
+    }
+
+    set({ loading: true, error: null });
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: getAuthRedirectUrl(),
+      },
+    });
+
+    set({ loading: false, error: error?.message ?? null });
+    if (error) return { error: error.message };
+    return {};
+  },
+
   signInWithOtp: async (email) => {
     if (!isSupabaseConfigured || !supabase) {
       const error = 'Supabase env vars are missing.';
@@ -59,7 +109,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: getAuthRedirectUrl(),
       },
     });
 
