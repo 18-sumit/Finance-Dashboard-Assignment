@@ -12,13 +12,13 @@ import { toast } from 'sonner';
 
 export const SettingsPage = () => {
   const { role, setRole, theme, toggleTheme } = useUIStore();
-  const { resetAll } = useTransactionStore();
+  const resetTransactions = useTransactionStore((s) => s.resetTransactions);
   const { exportCSV, exportJSON } = useExport();
 
   const [confirmReset, setConfirmReset] = useState(false);
 
   const handleReset = () => {
-    resetAll();
+    resetTransactions();
     toast.success('All app data has been reset to seed values');
   };
 

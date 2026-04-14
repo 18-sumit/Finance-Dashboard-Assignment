@@ -10,6 +10,10 @@ import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { useEffect } from 'react';
 import { useAuthStore } from './stores/authStore';
+import { useAccountStore } from './stores/accountStore';
+import { useTransactionStore } from './stores/transactionStore';
+import { useCategoryStore } from './stores/categoryStore';
+import { useBudgetStore } from './stores/budgetStore';
 
 const AppLayout = () => {
   return (
@@ -21,6 +25,15 @@ const AppLayout = () => {
 
 function App() {
   const initialize = useAuthStore((s) => s.initialize);
+  const userId = useAuthStore((s) => s.user?.id);
+  const initializeAccounts = useAccountStore((s) => s.initializeAccounts);
+  const initializeTransactions = useTransactionStore((s) => s.initializeTransactions);
+  const initializeCategories = useCategoryStore((s) => s.initializeCategories);
+  const initializeBudgets = useBudgetStore((s) => s.initializeBudgets);
+  const resetAccounts = useAccountStore((s) => s.resetAccounts);
+  const resetTransactions = useTransactionStore((s) => s.resetTransactions);
+  const resetCategories = useCategoryStore((s) => s.resetCategories);
+  const resetBudgets = useBudgetStore((s) => s.resetBudgets);
 
   useEffect(() => {
     let unsubscribe: (() => void) | void;
@@ -33,6 +46,45 @@ function App() {
       unsubscribe?.();
     };
   }, [initialize]);
+
+  useEffect(() => {
+    let cleanupAccounts: (() => void) | void;
+    let cleanupTransactions: (() => void) | void;
+    let cleanupCategories: (() => void) | void;
+    let cleanupBudgets: (() => void) | void;
+
+    if (!userId) {
+      resetAccounts();
+      resetTransactions();
+      resetCategories();
+      resetBudgets();
+      return;
+    }
+
+    void (async () => {
+      cleanupAccounts = await initializeAccounts();
+      cleanupTransactions = await initializeTransactions();
+      cleanupCategories = await initializeCategories();
+      cleanupBudgets = await initializeBudgets();
+    })();
+
+    return () => {
+      cleanupAccounts?.();
+      cleanupTransactions?.();
+      cleanupCategories?.();
+      cleanupBudgets?.();
+    };
+  }, [
+    userId,
+    initializeAccounts,
+    initializeTransactions,
+    initializeCategories,
+    initializeBudgets,
+    resetAccounts,
+    resetTransactions,
+    resetCategories,
+    resetBudgets,
+  ]);
 
   return (
     <Routes>
